@@ -1,39 +1,19 @@
 {
-  "best_trial_number": 0,
-  "best_cv_macro_f1": 0.9161,
+  "best_trial_number": 2,
+  "best_cv_macro_f1": 0.9169848431742063,
   "n_trials": 10,
-  "search_space": {
-    "num_leaves": [
-      31,
-      127
-    ],
-    "max_depth": [
-      5,
-      12
-    ],
-    "learning_rate": [
-      0.03,
-      0.15
-    ],
-    "subsample": [
-      0.6,
-      0.95
-    ],
-    "colsample_bytree": [
-      0.6,
-      0.95
-    ],
-    "min_child_samples": [
-      20,
-      100
-    ]
-  },
+  "search_trips": 20,
+  "cv_folds": 3,
+  "feature_count": 26,
   "best_params": {
-    "num_leaves": 67,
-    "max_depth": 12,
-    "learning_rate": 0.09744578609310868,
-    "subsample": 0.8095304694689628,
-    "colsample_bytree": 0.6546065241548528,
-    "min_child_samples": 32
+    "n_estimators": 64,
+    "num_leaves": 81,
+    "max_depth": 8,
+    "learning_rate": 0.04793819615223105,
+    "subsample": 0.8141485131528328,
+    "colsample_bytree": 0.6488228512282146,
+    "min_child_samples": 43,
+    "reg_lambda": 0.029204338471814112,
+    "subsample_freq": 1
   }
 }

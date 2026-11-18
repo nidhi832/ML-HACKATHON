@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings as SettingsIcon, 
   Cpu, 
@@ -7,8 +7,11 @@ import {
   Radio, 
   Check, 
   Server,
-  Layers
+  Layers,
+  Wifi,
+  AlertCircle
 } from 'lucide-react';
+import { getApiBaseUrl, setApiBaseUrl, fetchHealth } from '../services/api';
 
 export default function Settings() {
   const [defaultModel, setDefaultModel] = useState('lightgbm');
@@ -19,7 +22,35 @@ export default function Settings() {
   const [gpsColor, setGpsColor] = useState('#EF4444');
   const [saved, setSaved] = useState(false);
 
+  // Two-laptop deployment connection config
+  const [apiUrl, setApiUrl] = useState('');
+  const [connStatus, setConnStatus] = useState('idle'); // 'idle' | 'checking' | 'connected' | 'error'
+  const [connMsg, setConnMsg] = useState('');
+
+  useEffect(() => {
+    setApiUrl(getApiBaseUrl());
+    testConnection(getApiBaseUrl());
+  }, []);
+
+  const testConnection = async (urlToTest) => {
+    setConnStatus('checking');
+    setConnMsg('Connecting to API server...');
+    const prev = getApiBaseUrl();
+    try {
+      setApiBaseUrl(urlToTest);
+      const res = await fetchHealth();
+      setConnStatus('connected');
+      setConnMsg(`Connected: ${res.system} (v${res.version}) - Model: ${res.model_name}`);
+    } catch (e) {
+      setConnStatus('error');
+      setConnMsg(`Connection Failed: ${e.message}`);
+      setApiBaseUrl(prev);
+    }
+  };
+
   const handleSave = () => {
+    setApiBaseUrl(apiUrl);
+    testConnection(apiUrl);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -129,30 +160,71 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* System & API Status */}
+        {/* System & Two-Laptop Distributed Connection */}
         <div className="bg-panel border border-border rounded-card p-5 space-y-4 shadow-xl md:col-span-2">
-          <div className="flex items-center gap-2 border-b border-border pb-3">
-            <Server className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-white text-sm">Backend & Engine Connection</h3>
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="flex items-center gap-2">
+              <Server className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-white text-sm">Two-Laptop Distributed Connection</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              {connStatus === 'checking' && (
+                <span className="text-xs text-yellow-400 flex items-center gap-1 font-mono">
+                  <Wifi className="w-3.5 h-3.5 animate-spin" /> Probing /health...
+                </span>
+              )}
+              {connStatus === 'connected' && (
+                <span className="text-xs text-emerald-400 flex items-center gap-1 font-mono">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
+                </span>
+              )}
+              {connStatus === 'error' && (
+                <span className="text-xs text-rose-400 flex items-center gap-1 font-mono">
+                  <AlertCircle className="w-3.5 h-3.5" /> Disconnected
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div className="p-3 bg-background rounded-lg border border-border space-y-1">
-              <span className="text-slate-400">API Status</span>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span className="font-bold text-white">FastAPI Connected</span>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-slate-300 font-semibold text-xs block">
+                Backend API Server Base URL (Laptop 1)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. http://192.168.1.100:8000 or leave blank for local"
+                  value={apiUrl}
+                  onChange={(e) => setApiUrl(e.target.value)}
+                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-primary transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => testConnection(apiUrl)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold border border-border transition"
+                >
+                  Test Ping
+                </button>
               </div>
+              <p className="text-[11px] text-slate-400">
+                {connMsg || "Leave blank when UI and FastAPI run on the same machine. Enter http://<Laptop1_IP>:8000 when running UI on Laptop 2."}
+              </p>
             </div>
 
-            <div className="p-3 bg-background rounded-lg border border-border space-y-1">
-              <span className="text-slate-400">Model Weights</span>
-              <p className="font-bold text-white">6 Models Serialized (artifacts/)</p>
-            </div>
-
-            <div className="p-3 bg-background rounded-lg border border-border space-y-1">
-              <span className="text-slate-400">Projection Engine</span>
-              <p className="font-bold text-white">pyproj UTM Zone Dynamic</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2">
+              <div className="p-3 bg-background rounded-lg border border-border space-y-1">
+                <span className="text-slate-400">Host Binding</span>
+                <p className="font-bold text-white font-mono">0.0.0.0:8000 (LAN)</p>
+              </div>
+              <div className="p-3 bg-background rounded-lg border border-border space-y-1">
+                <span className="text-slate-400">CORS Policy</span>
+                <p className="font-bold text-emerald-400 font-mono">Enabled (*)</p>
+              </div>
+              <div className="p-3 bg-background rounded-lg border border-border space-y-1">
+                <span className="text-slate-400">Model Pipeline</span>
+                <p className="font-bold text-primary font-mono">HMM + LightGBM</p>
+              </div>
             </div>
           </div>
 

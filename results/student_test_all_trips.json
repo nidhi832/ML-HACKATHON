@@ -3,12 +3,12 @@
     "total_trips": 10,
     "successful_trips": 10,
     "failed_trips": 0,
-    "total_wall_time_seconds": 10.49,
-    "mean_top1_accuracy_pct": 91.98,
-    "mean_route_continuity_pct": 98.9,
+    "total_wall_time_seconds": 5.43,
+    "mean_top1_accuracy_pct": 93.29,
+    "mean_route_continuity_pct": 98.77,
     "mean_candidate_recall_pct": 98.64,
     "mean_candidate_macro_f1": 0.937,
-    "mean_latency_ms": 755.78,
+    "mean_latency_ms": 334.75,
     "model_name": "LightGBM",
     "decoder": "HMM Viterbi"
   },
@@ -17,53 +17,53 @@
       "trip_id": "00000000",
       "status": "SUCCESS",
       "num_observations": 2503,
-      "num_arcs_traversed": 205,
-      "top1_accuracy_pct": 94.73,
-      "route_continuity_pct": 99.6802557953637,
+      "num_arcs_traversed": 193,
+      "top1_accuracy_pct": 94.93,
+      "route_continuity_pct": 99.52038369304557,
       "reference_continuity_pct": 99.96,
       "candidate_recall_pct": 98.6,
       "candidate_macro_f1": 0.9717,
       "log_loss": 0.0241,
-      "processing_time_ms": 1303.37
+      "processing_time_ms": 491.27
     },
     {
       "trip_id": "00000007",
       "status": "SUCCESS",
       "num_observations": 1354,
-      "num_arcs_traversed": 153,
-      "top1_accuracy_pct": 94.61,
-      "route_continuity_pct": 100.0,
+      "num_arcs_traversed": 122,
+      "top1_accuracy_pct": 99.26,
+      "route_continuity_pct": 99.9260901699926,
       "reference_continuity_pct": 100.0,
       "candidate_recall_pct": 100.0,
       "candidate_macro_f1": 0.9611,
       "log_loss": 0.0294,
-      "processing_time_ms": 557.57
+      "processing_time_ms": 214.31
     },
     {
       "trip_id": "00000009",
       "status": "SUCCESS",
       "num_observations": 1049,
-      "num_arcs_traversed": 415,
-      "top1_accuracy_pct": 87.42,
-      "route_continuity_pct": 98.18702290076335,
+      "num_arcs_traversed": 412,
+      "top1_accuracy_pct": 87.99,
+      "route_continuity_pct": 98.09160305343512,
       "reference_continuity_pct": 98.19,
       "candidate_recall_pct": 97.33,
       "candidate_macro_f1": 0.921,
       "log_loss": 0.0756,
-      "processing_time_ms": 392.12
+      "processing_time_ms": 182.24
     },
     {
       "trip_id": "00000040",
       "status": "SUCCESS",
       "num_observations": 2995,
-      "num_arcs_traversed": 362,
-      "top1_accuracy_pct": 93.36,
-      "route_continuity_pct": 99.79959919839679,
+      "num_arcs_traversed": 313,
+      "top1_accuracy_pct": 94.39,
+      "route_continuity_pct": 99.73279893119572,
       "reference_continuity_pct": 99.8,
       "candidate_recall_pct": 98.93,
       "candidate_macro_f1": 0.9632,
       "log_loss": 0.0322,
-      "processing_time_ms": 1057.67
+      "processing_time_ms": 466.84
     },
     {
       "trip_id": "00000052",
@@ -76,72 +76,72 @@
       "candidate_recall_pct": 98.85,
       "candidate_macro_f1": 0.9786,
       "log_loss": 0.0269,
-      "processing_time_ms": 138.39
+      "processing_time_ms": 51.72
     },
     {
       "trip_id": "00000056",
       "status": "SUCCESS",
       "num_observations": 3958,
-      "num_arcs_traversed": 1281,
-      "top1_accuracy_pct": 94.04,
+      "num_arcs_traversed": 1278,
+      "top1_accuracy_pct": 93.66,
       "route_continuity_pct": 97.62446297700278,
       "reference_continuity_pct": 97.83,
       "candidate_recall_pct": 98.56,
       "candidate_macro_f1": 0.9261,
       "log_loss": 0.0705,
-      "processing_time_ms": 1444.37
+      "processing_time_ms": 656.27
     },
     {
       "trip_id": "00000065",
       "status": "SUCCESS",
       "num_observations": 768,
-      "num_arcs_traversed": 161,
-      "top1_accuracy_pct": 90.62,
-      "route_continuity_pct": 99.21773142112124,
+      "num_arcs_traversed": 153,
+      "top1_accuracy_pct": 88.8,
+      "route_continuity_pct": 98.82659713168188,
       "reference_continuity_pct": 99.48,
       "candidate_recall_pct": 97.4,
       "candidate_macro_f1": 0.9315,
       "log_loss": 0.0659,
-      "processing_time_ms": 300.7
+      "processing_time_ms": 129.13
     },
     {
       "trip_id": "00000076",
       "status": "SUCCESS",
       "num_observations": 1486,
-      "num_arcs_traversed": 383,
-      "top1_accuracy_pct": 93.54,
-      "route_continuity_pct": 99.19191919191918,
+      "num_arcs_traversed": 374,
+      "top1_accuracy_pct": 94.35,
+      "route_continuity_pct": 99.12457912457913,
       "reference_continuity_pct": 99.53,
       "candidate_recall_pct": 98.05,
       "candidate_macro_f1": 0.9395,
       "log_loss": 0.057,
-      "processing_time_ms": 645.22
+      "processing_time_ms": 408.54
     },
     {
       "trip_id": "00000077",
       "status": "SUCCESS",
       "num_observations": 3911,
-      "num_arcs_traversed": 592,
-      "top1_accuracy_pct": 81.36,
-      "route_continuity_pct": 99.94884910485933,
+      "num_arcs_traversed": 298,
+      "top1_accuracy_pct": 88.49,
+      "route_continuity_pct": 99.48849104859335,
       "reference_continuity_pct": 100.0,
       "candidate_recall_pct": 99.72,
       "candidate_macro_f1": 0.8616,
       "log_loss": 0.1059,
-      "processing_time_ms": 1315.44
+      "processing_time_ms": 594.11
     },
     {
       "trip_id": "00000091",
       "status": "SUCCESS",
       "num_observations": 874,
-      "num_arcs_traversed": 216,
-      "top1_accuracy_pct": 92.45,
+      "num_arcs_traversed": 210,
+      "top1_accuracy_pct": 93.36,
       "route_continuity_pct": 98.3963344788087,
       "reference_continuity_pct": 97.82,
       "candidate_recall_pct": 98.97,
       "candidate_macro_f1": 0.9156,
       "log_loss": 0.072,
-      "processing_time_ms": 402.98
+      "processing_time_ms": 153.04
     }
   ]
 }

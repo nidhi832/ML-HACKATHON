@@ -38,13 +38,24 @@ export default function MapMatching({ activeDataset }) {
   });
 
   const modelOptions = [
-    { id: 'lightgbm', name: 'LightGBM (Gradient Boosting) — Champion', desc: 'Top-1: 87.16% | F1: 0.9293' },
-    { id: 'random_forest', name: 'Random Forest (Bagging Ensemble)', desc: 'CV F1: 0.9042 | 40 Trees' },
-    { id: 'pytorch_mlp', name: 'MLP (PyTorch Deep Neural Network)', desc: 'BCEWithLogits | 3 Layers' },
-    { id: 'logistic_regression', name: 'Logistic Regression (Scaled L2)', desc: 'Fastest | 1.42 ms / 1k' },
-    { id: 'subsampled_knn', name: 'K-Nearest Neighbours (Brute K=9)', desc: 'Non-linear Distance' },
-    { id: 'gaussian_nb', name: 'Gaussian Naive Bayes', desc: 'Probabilistic Baseline' }
+    { id: 'lightgbm', name: 'LightGBM + HMM Viterbi (Champion End-to-End)', desc: '92.87% Top-1 | 98.96% Continuity | 3 U-turns | LCS F1: 0.9502', withHMM: true, baseModel: 'lightgbm' },
+    { id: 'lightgbm_no_hmm', name: 'LightGBM (Argmax Classifier Only — No HMM)', desc: '87.16% Top-1 | 93.93% Continuity | 779 U-turns | LCS F1: 0.7511', withHMM: false, baseModel: 'lightgbm' },
+    { id: 'random_forest', name: 'Random Forest + HMM Viterbi', desc: '92.47% Top-1 | 98.96% Continuity | 2 U-turns', withHMM: true, baseModel: 'random_forest' },
+    { id: 'pytorch_mlp', name: 'MLP (PyTorch Deep Neural Network) + HMM', desc: '91.12% Top-1 | 98.95% Continuity | 3 Layers BCE', withHMM: true, baseModel: 'pytorch_mlp' },
+    { id: 'logistic_regression', name: 'Logistic Regression + HMM Viterbi', desc: '90.61% Top-1 | 99.12% Continuity | 1.42 ms / 1k', withHMM: true, baseModel: 'logistic_regression' },
+    { id: 'subsampled_knn', name: 'K-Nearest Neighbours (Brute K=9) + HMM', desc: '85.42% Top-1 | 97.46% Continuity', withHMM: true, baseModel: 'subsampled_knn' },
+    { id: 'gaussian_nb', name: 'Gaussian Naive Bayes + HMM Viterbi', desc: '89.87% Top-1 | 99.42% Continuity', withHMM: true, baseModel: 'gaussian_nb' }
   ];
+
+  const currentOptionId = (!useHMM && selectedModel === 'lightgbm') ? 'lightgbm_no_hmm' : selectedModel;
+
+  const handleModelChange = (optionId) => {
+    const opt = modelOptions.find(m => m.id === optionId);
+    if (opt) {
+      setSelectedModel(opt.baseModel);
+      setUseHMM(opt.withHMM);
+    }
+  };
 
   // Load trips list when dataset changes
   useEffect(() => {
@@ -62,12 +73,12 @@ export default function MapMatching({ activeDataset }) {
   useEffect(() => {
     async function loadCurrentTrip() {
       if (!selectedTripId) return;
-      const data = await fetchTripDetails(selectedTripId, activeDataset, selectedModel);
+      const data = await fetchTripDetails(selectedTripId, activeDataset, selectedModel, useHMM);
       setTripData(data);
       setActivePointIndex(0);
     }
     loadCurrentTrip();
-  }, [selectedTripId, activeDataset, selectedModel]);
+  }, [selectedTripId, activeDataset, selectedModel, useHMM]);
 
   const handleRunMatch = async () => {
     setIsRunning(true);
@@ -135,15 +146,20 @@ export default function MapMatching({ activeDataset }) {
               </select>
             </div>
 
-            {/* Model Selection Dropdown */}
+            {/* Model & Architecture Selection Dropdown */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-primary" />
-                Machine Learning Model
+              <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-primary" />
+                  ML Candidate Model & Sequence Decoder
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono">
+                  {useHMM ? 'HMM Viterbi' : 'Classifier Argmax'}
+                </span>
               </label>
               <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
+                value={currentOptionId}
+                onChange={(e) => handleModelChange(e.target.value)}
                 className="w-full bg-background border border-border rounded-lg px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-primary transition"
               >
                 {modelOptions.map((m) => (
@@ -152,8 +168,8 @@ export default function MapMatching({ activeDataset }) {
                   </option>
                 ))}
               </select>
-              <p className="text-[11px] text-slate-500 font-mono">
-                {modelOptions.find(m => m.id === selectedModel)?.desc}
+              <p className="text-[11px] text-slate-400 font-mono">
+                {modelOptions.find(m => m.id === currentOptionId)?.desc}
               </p>
             </div>
 

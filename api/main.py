@@ -558,6 +558,13 @@ def run_map_matching(req: MatchRequest):
         f"Top-1: {top1_acc if top1_acc is not None else 'N/A'}"
     )
 
+    trip_details = get_trip_details(
+        trip_id=req.trip_id,
+        partition=req.partition,
+        model_name=req.model_name,
+        use_hmm=req.use_hmm
+    )
+
     return {
         "trip_id": req.trip_id,
         "model_used": pipe_res.model_name,
@@ -572,6 +579,7 @@ def run_map_matching(req: MatchRequest):
         "traversed_arcs_count": pipe_res.num_arcs_traversed,
         "traversed_route": pipe_res.traversed_route,
         "predicted_arcs": pipe_res.predicted_arcs,
+        "trip_details": trip_details,
     }
 
 

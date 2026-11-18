@@ -163,8 +163,10 @@ class MapMatchingPipeline:
             scaler_path = os.path.join(PROJECT_ROOT, "artifacts", "pytorch_mlp_scaler.joblib")
             if os.path.exists(scaler_path):
                 mlp_model.scaler = joblib.load(scaler_path)
-            mlp_model.network.load_state_dict(torch.load(target_path, map_location="cpu"))
-            mlp_model.network.eval()
+            net_obj = getattr(mlp_model, "net", getattr(mlp_model, "network", None))
+            if net_obj is not None:
+                net_obj.load_state_dict(torch.load(target_path, map_location="cpu"))
+                net_obj.eval()
             self.model = mlp_model
             self.model_name = "MLP (PyTorch Neural Network)"
         else:

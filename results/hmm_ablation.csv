@@ -1,0 +1,9 @@
+config_name,transition_weight,reverse_arc_log_prob,two_hop_log_prob,three_hop_log_prob,gap_threshold_sec,top1_acc_pct,route_continuity_pct,forward_continuity_pct,reverse_uturns,disconnected_jumps,route_lcs_f1,route_jaccard,decode_ms_per_1000_obs
+"Classifier-Only Baseline (LightGBM Argmax, no HMM)",0.0,0.0,0.0,,,87.16,93.93,89.86,779,685,0.7511,0.797,0.0
+"Basic Topology HMM (no U-turn penalty, tr_w=1.5)",1.5,-0.5,-2.5,,30.0,90.91,99.12,97.02,402,24,0.8916,0.9002,94.64
+"Reverse-Arc-Aware HMM (rev=-10, tr_w=1.0)",1.0,-10.0,-2.5,,30.0,92.27,98.51,98.49,5,24,0.938,0.9055,93.86
+"Reverse-Arc-Aware HMM (rev=-10, tr_w=1.5)",1.5,-10.0,-2.5,,30.0,92.91,98.79,98.77,3,24,0.9474,0.9161,92.81
+"Champion HMM (rev=-10, tr_w=2.0, gap=30s) [Selected]",2.0,-10.0,-2.5,,30.0,92.87,98.96,98.95,3,23,0.9502,0.9146,89.37
+"Reverse-Arc-Aware HMM (rev=-10, tr_w=2.5)",2.5,-10.0,-2.5,,30.0,93.0,99.08,99.07,3,23,0.9544,0.9189,97.82
+"Reverse-Arc-Aware HMM + 3-Hop (rev=-10, h3=-5, tr_w=2.0)",2.0,-10.0,-2.5,-5.0,30.0,92.82,99.0,98.98,3,34,0.9501,0.9138,102.77
+"No GPS Gap Softening (rev=-10, tr_w=2.0, gap=disabled)",2.0,-10.0,-2.5,,,92.87,98.96,98.95,3,23,0.9502,0.9146,96.99

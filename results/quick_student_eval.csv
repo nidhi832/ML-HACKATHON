@@ -1,0 +1,6 @@
+model,top1_pct,macro_f1,log_loss,infer_s
+logistic_regression,84.67,0.8989,0.0991,0.0
+gaussian_nb,81.27,0.6583,1.4502,0.1
+subsampled_knn,80.64,0.8742,0.1684,8.3
+random_forest,85.83,0.9237,0.0659,0.6
+lightgbm,87.16,0.9293,0.0613,0.8

@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Dependencies
+node_modules/
+ui/node_modules/
+
 # Large intermediate parquet cache (regenerated via scripts/02_build_dataset.py)
 data_cache/
 *.parquet.tmp
@@ -21,6 +25,9 @@ ENV/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Test scratch files
+test_*.html
 
 # Hidden / Private evaluation partition
 evaluator_test/

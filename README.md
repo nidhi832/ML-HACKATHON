@@ -27,6 +27,15 @@
 
 ```
 .
+├── api/                   # FastAPI backend service (endpoints, inference, SPA serving)
+│   └── main.py
+├── ui/                    # TRACE.AI React + Tailwind + Leaflet frontend application
+│   ├── src/
+│   │   ├── components/    # InteractiveMap, RoutePlayback, MetricCard, Sidebar, Topbar
+│   │   ├── pages/         # Dashboard, MapMatching, TripExplorer, ModelComparison, Evaluation, Settings
+│   │   └── services/      # REST API client with offline fallback
+│   ├── dist/              # Production-built bundle served by FastAPI
+│   └── package.json
 ├── configs/               # System configurations and parameters
 ├── src/                   # Core production source code
 │   ├── data_io.py         # NamedTuple TripData, parquet and raw loaders
@@ -43,18 +52,35 @@
 │   ├── 03_train_compare.py# 5-Fold GroupKFold training, evaluation & artifact saving
 │   ├── 04_plots.py        # Generates publication figures to results/figures/
 │   ├── 06_folium_maps.py  # Generates multi-layer interactive Folium HTML maps
-│   └── demo.py            # Live interactive evaluator CLI demonstration
+│   ├── demo.py            # Live interactive evaluator CLI demonstration
+│   └── launch_trace_ai.py # One-command launcher for TRACE.AI web platform
 ├── artifacts/             # Serialized model weights (.joblib, .pt)
 ├── results/               # Experiment logs, CSV metrics, and figures
-│   ├── eda/               # Statistical inventory and quality tables
-│   ├── figures/           # 200 DPI diagnostic plots (CV, F1, Loss, CM)
-│   ├── model_comparison.csv
-│   └── candidate_miss_rate.csv
 ├── maps/                  # Interactive Folium HTML maps (Best, Typical, Worst)
 ├── report/                # Technical report source and documentation
+├── launch_trace_ai.bat    # Windows 1-click launcher
 ├── requirements.txt       # Python dependencies
 └── README.md
 ```
+
+---
+
+## 🌐 Launch TRACE.AI Web Dashboard
+
+To launch the full interactive web application:
+
+```bash
+# One-click command:
+python scripts/launch_trace_ai.py
+# Or double-click 'launch_trace_ai.bat' on Windows
+```
+The application will start at **http://localhost:8000** and automatically open in your default browser:
+- **Overview Dashboard:** Live KPI telemetry, interactive road network map, confidence distributions.
+- **GPS Map Matching:** Model selector (6 models), K candidate slider, HMM toggle, interactive map with layer toggles, and **live route trajectory playback (1x/2x/4x)**!
+- **Trip Explorer:** Sortable, searchable data table across all trajectories with accuracy ratings.
+- **Model Performance:** Recharts bar and line charts comparing all 6 models, CV GroupKFold folds, and PyTorch epoch loss convergence.
+- **Evaluation Dashboard:** Official benchmark analysis across 10 evaluation trips with CSV export.
+- **API Documentation:** Interactive Swagger UI at **http://localhost:8000/docs**.
 
 ---
 

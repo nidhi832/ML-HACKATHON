@@ -387,7 +387,21 @@ def run_eda():
     # Center map on trajectory center
     center_lat = float(trip.track["lat"].mean())
     center_lon = float(trip.track["lon"].mean())
-    fmap = folium.Map(location=[center_lat, center_lon], zoom_start=14, tiles="OpenStreetMap")
+    fmap = folium.Map(location=[center_lat, center_lon], zoom_start=14, tiles=None)
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        attr="Tiles &copy; Esri",
+        name="Esri WorldStreetMap (Clear Roads)",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
+    folium.TileLayer(
+        tiles="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attr="&copy; CARTO",
+        name="CartoDB Light",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
 
     # Layer 1: Road network within trip bbox
     min_lat, max_lat = trip.track["lat"].min() - 0.01, trip.track["lat"].max() + 0.01

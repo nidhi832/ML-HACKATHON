@@ -479,7 +479,7 @@ def run_map_matching(req: MatchRequest):
 
 @app.get("/api/models")
 def get_models_comparison():
-    """Retrieve full model benchmarks, confusion matrices, and training histories."""
+    """Retrieve full model benchmarks, confusion matrices, training histories, HMM, and Bayesian tuning."""
     csv_path = RESULTS_DIR / "model_comparison.csv"
     if not csv_path.exists():
         raise HTTPException(status_code=404, detail="model_comparison.csv not found")
@@ -496,11 +496,50 @@ def get_models_comparison():
     if mlp_path.exists():
         with open(mlp_path, "r") as f:
             mlp_loss = json.load(f)
+
+    # Person A: HMM & Viterbi results
+    hmm_comp = []
+    hmm_comp_path = RESULTS_DIR / "hmm_comparison.csv"
+    if hmm_comp_path.exists():
+        hmm_comp = pd.read_csv(hmm_comp_path).fillna("").to_dict(orient="records")
+
+    hmm_ablation = []
+    hmm_abl_path = RESULTS_DIR / "hmm_ablation.csv"
+    if hmm_abl_path.exists():
+        hmm_ablation = pd.read_csv(hmm_abl_path).fillna("").to_dict(orient="records")
+
+    hmm_per_trip = []
+    hmm_trip_path = RESULTS_DIR / "hmm_per_trip_comparison.csv"
+    if hmm_trip_path.exists():
+        hmm_per_trip = pd.read_csv(hmm_trip_path).fillna("").to_dict(orient="records")
+
+    # Person B: Bayesian Tuning & Optuna results
+    tuning_comp = []
+    tune_path = RESULTS_DIR / "tuning_comparison.csv"
+    if tune_path.exists():
+        tuning_comp = pd.read_csv(tune_path).fillna("").to_dict(orient="records")
+
+    optuna_trials = []
+    opt_path = RESULTS_DIR / "optuna_trials.csv"
+    if opt_path.exists():
+        optuna_trials = pd.read_csv(opt_path).fillna("").to_dict(orient="records")
+
+    bayes_config = {}
+    bcfg_path = PROJECT_ROOT / "configs" / "bayes_opt_config.json"
+    if bcfg_path.exists():
+        with open(bcfg_path, "r") as f:
+            bayes_config = json.load(f)
             
     return {
         "models": df.to_dict(orient="records"),
         "confusion_matrices": cms,
         "mlp_epoch_loss": mlp_loss,
+        "hmm_comparison": hmm_comp,
+        "hmm_ablation": hmm_ablation,
+        "hmm_per_trip": hmm_per_trip,
+        "tuning_comparison": tuning_comp,
+        "optuna_trials": optuna_trials,
+        "bayes_config": bayes_config,
         "group_kfold_summary": {
             "folds": 5,
             "grouping_key": "trip_id",

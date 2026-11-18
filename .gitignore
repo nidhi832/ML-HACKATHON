@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large intermediate parquet cache (regenerated via scripts/02_build_dataset.py)
+data_cache/
+*.parquet.tmp
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Hidden / Private evaluation partition
+evaluator_test/

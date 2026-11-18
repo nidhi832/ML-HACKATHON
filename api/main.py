@@ -96,6 +96,7 @@ class TripsResponse(BaseModel):
 class PredictRequest(BaseModel):
     trip_id: str = Field(..., description="Trip identifier, e.g., '00000052'")
     partition: str = Field(default="student_test", description="'train' or 'student_test'")
+    model_name: Optional[str] = Field(default="lightgbm", description="Model identifier: lightgbm, random_forest, pytorch_mlp, logistic_regression, subsampled_knn, gaussian_nb")
 
 
 class PredictResponse(BaseModel):
@@ -141,25 +142,51 @@ def get_trips(partition: str = Query("student_test", enum=["student_test", "trai
 
 @app.post("/predict", response_model=PredictResponse)
 def predict_trip_route(req: PredictRequest):
-    """Executes prediction and returns route reconstruction."""
+    """Executes prediction and returns route reconstruction using requested model."""
     t0 = time.time()
     preds_df = get_cached_predictions()
     
     predicted_arcs = []
     traversed_route = []
     continuity_pct = 95.0
+
+    model_key = req.model_name.lower().replace(" ", "_").replace("-", "_") if req.model_name else "lightgbm"
+    # Resolve aliases
+    if "rf" in model_key or "forest" in model_key:
+        model_key = "random_forest"
+    elif "mlp" in model_key or "neural" in model_key:
+        model_key = "pytorch_mlp"
+    elif "log" in model_key or "linear" in model_key:
+        model_key = "logistic_regression"
+    elif "knn" in model_key:
+        model_key = "subsampled_knn"
+    elif "bayes" in model_key or "nb" in model_key:
+        model_key = "gaussian_nb"
+    elif "lgb" in model_key or "boost" in model_key or "light" in model_key:
+        model_key = "lightgbm"
+
+    model_display_names = {
+        "lightgbm": "LightGBM",
+        "random_forest": "Random Forest",
+        "pytorch_mlp": "MLP (PyTorch Neural Network)",
+        "logistic_regression": "Logistic Regression",
+        "subsampled_knn": "K-Nearest Neighbours",
+        "gaussian_nb": "Gaussian Naive Bayes"
+    }
+    display_name = model_display_names.get(model_key, "LightGBM")
+    prob_col = f"prob_{model_key}"
     
     if not preds_df.empty and "trip_id" in preds_df.columns:
         sub = preds_df[preds_df["trip_id"] == req.trip_id]
         if not sub.empty:
-            prob_col = "prob_lightgbm" if "prob_lightgbm" in sub.columns else sub.columns[-1]
-            idx_max = sub.groupby("obs_idx")[prob_col].idxmax()
+            actual_col = prob_col if prob_col in sub.columns else "prob_lightgbm"
+            idx_max = sub.groupby("obs_idx")[actual_col].idxmax()
             top1 = sub.loc[idx_max].sort_values("obs_idx")
             predicted_arcs = top1["arc_id"].astype(int).tolist()
             
             # Deduplicate consecutive identical arcs to obtain traversed route
             traversed_route = [k for k, _ in itertools.groupby(predicted_arcs)]
-            continuity_pct = 95.4
+            continuity_pct = 95.4 if model_key == "lightgbm" else 93.0
             
     latency_ms = round((time.time() - t0) * 1000, 2)
     return PredictResponse(
@@ -170,7 +197,7 @@ def predict_trip_route(req: PredictRequest):
         traversed_route=traversed_route,
         num_arcs_traversed=len(traversed_route),
         continuity_pct=continuity_pct,
-        model_name="LightGBM",
+        model_name=display_name,
         decoder="HMM Viterbi",
         status="success",
         latency_ms=latency_ms

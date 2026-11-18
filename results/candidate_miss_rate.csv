@@ -1,0 +1,9 @@
+partition,K,total_observations,hits,recall_pct,miss_rate_pct
+train,5,208417,181349,87.01,12.99
+train,10,208417,190958,91.62,8.38
+train,15,208417,193100,92.65,7.35
+train,20,208417,194757,93.45,6.55
+student_test,5,19160,18600,97.08,2.92
+student_test,10,19160,18936,98.83,1.17
+student_test,15,19160,18974,99.03,0.97
+student_test,20,19160,18989,99.11,0.89

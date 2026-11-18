@@ -1,0 +1,57 @@
+{
+  "logistic_regression": {
+    "model_name": "Logistic Regression",
+    "family": "Linear / Generalized Linear",
+    "C": 1.0,
+    "max_iter": 250,
+    "solver": "lbfgs",
+    "scaler": "StandardScaler",
+    "random_state": 42
+  },
+  "gaussian_nb": {
+    "model_name": "Gaussian Naive Bayes",
+    "family": "Bayesian / Probabilistic",
+    "var_smoothing": 1e-08,
+    "scaler": "StandardScaler"
+  },
+  "subsampled_knn": {
+    "model_name": "K-Nearest Neighbours",
+    "family": "Instance-based",
+    "n_neighbors": 9,
+    "weights": "distance",
+    "max_fit_samples": 25000,
+    "random_state": 42
+  },
+  "random_forest": {
+    "model_name": "Random Forest",
+    "family": "Ensemble (Bagging)",
+    "n_estimators": 40,
+    "max_depth": 12,
+    "max_samples": 0.1,
+    "min_samples_split": 10,
+    "random_state": 42
+  },
+  "lightgbm": {
+    "model_name": "LightGBM",
+    "family": "Ensemble (Gradient Boosting)",
+    "n_estimators": 180,
+    "max_depth": 7,
+    "num_leaves": 63,
+    "learning_rate": 0.08,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "random_state": 42
+  },
+  "pytorch_mlp": {
+    "model_name": "MLP (PyTorch Neural Network)",
+    "family": "Deep Learning / Neural Networks",
+    "architecture": "Linear(64)->BN->ReLU->Dropout(0.1)->Linear(32)->BN->ReLU->Linear(1)",
+    "epochs": 10,
+    "batch_size": 4096,
+    "lr": 0.005,
+    "loss": "BCEWithLogitsLoss",
+    "optimizer": "Adam",
+    "scaler": "StandardScaler",
+    "random_state": 42
+  }
+}

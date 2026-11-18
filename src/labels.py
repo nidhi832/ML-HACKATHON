@@ -159,7 +159,21 @@ def generate_alignment_debug_map(
 
     center_lat = float(track["lat"].mean())
     center_lon = float(track["lon"].mean())
-    fmap = folium.Map(location=[center_lat, center_lon], zoom_start=14, tiles="OpenStreetMap")
+    fmap = folium.Map(location=[center_lat, center_lon], zoom_start=14, tiles=None)
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        attr="Tiles &copy; Esri",
+        name="Esri WorldStreetMap (Clear Roads)",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
+    folium.TileLayer(
+        tiles="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attr="&copy; CARTO",
+        name="CartoDB Light",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
 
     nodes_arr = nodes[["lon", "lat"]].to_numpy()
     from_nds = arcs["from_node"].to_numpy()

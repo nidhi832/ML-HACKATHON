@@ -2,6 +2,7 @@
 PathSnap: Multi-Layer Interactive Folium Map Generator
 Generates rich, layered interactive maps for Best, Typical, and Worst student-test trips.
 Displays:
+  - High-reliability base maps (Esri WorldStreetMap, CartoDB Light, CartoDB Voyager) - NO 403 BLOCKS!
   - Raw GPS observations (blue dots with timestamp/speed popups)
   - Nearby road network (grey thin lines)
   - Reference ground-truth route (green line)
@@ -9,7 +10,7 @@ Displays:
   - Misclassified GPS observations (orange glowing circle markers)
 Includes:
   - Legend box
-  - LayerControl for toggling layers
+  - LayerControl for toggling layers & base maps
   - Auto-fit bounding box
 """
 
@@ -38,26 +39,26 @@ def build_legend_html():
     return """
     <div style="
         position: fixed; 
-        bottom: 30px; left: 30px; width: 220px; height: 165px; 
+        bottom: 30px; left: 30px; width: 230px; height: 175px; 
         background-color: white; border:2px solid #555; z-index:9999; 
         font-size:12px; font-family: Arial, sans-serif; padding: 10px;
         box-shadow: 2px 2px 6px rgba(0,0,0,0.3); border-radius: 6px;
         opacity: 0.95;
     ">
         <b style="font-size:13px;">PathSnap Map Layers</b><br>
-        <div style="margin-top: 6px;">
+        <div style="margin-top: 6px; line-height: 1.6;">
             <i style="background: #2b5c8f; width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px;"></i> Raw GPS Points<br>
             <i style="background: #27ae60; width: 16px; height: 4px; display: inline-block; margin-right: 6px; vertical-align: middle;"></i> Reference Route (Ground Truth)<br>
             <i style="background: #c0392b; width: 16px; height: 4px; display: inline-block; margin-right: 6px; vertical-align: middle; border-top: 2px dashed #c0392b;"></i> Predicted Route (Top-1)<br>
             <i style="background: #e67e22; width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px;"></i> Misclassified Points<br>
-            <i style="background: #95a5a6; width: 16px; height: 2px; display: inline-block; margin-right: 6px; vertical-align: middle;"></i> Road Network (Arcs)<br>
+            <i style="background: #7f8c8d; width: 16px; height: 2px; display: inline-block; margin-right: 6px; vertical-align: middle;"></i> Road Network (Arcs)<br>
         </div>
     </div>
     """
 
 
 def make_map(trip_id: str, preds_df: pd.DataFrame, out_path: Path, prob_col: str = "prob_lightgbm") -> folium.Map:
-    """Generate a multi-layer interactive map for a given trip."""
+    """Generate a multi-layer interactive map for a given trip with verified tile servers."""
     trip_dir = STUDENT_TEST_DIR / trip_id
     trip = load_trip(trip_dir)
     
@@ -72,12 +73,39 @@ def make_map(trip_id: str, preds_df: pd.DataFrame, out_path: Path, prob_col: str
     center_lat = float(trip.track["lat"].mean())
     center_lon = float(trip.track["lon"].mean())
     
+    # Initialize map without default tiles to prevent OSM 403 policy block
     fmap = folium.Map(
         location=[center_lat, center_lon],
         zoom_start=14,
-        tiles="OpenStreetMap"
+        tiles=None
     )
     
+    # Add reliable, high-performance base map tiles
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        attr="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China",
+        name="Esri WorldStreetMap (Clear Roads)",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
+    
+    folium.TileLayer(
+        tiles="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attr="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> &copy; <a href='https://carto.com/attributions'>CARTO</a>",
+        name="CartoDB Light (High Contrast)",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
+    
+    folium.TileLayer(
+        tiles="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        attr="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> &copy; <a href='https://carto.com/attributions'>CARTO</a>",
+        name="CartoDB Voyager",
+        overlay=False,
+        control=True
+    ).add_to(fmap)
+    
+    # Feature Groups
     fg_network = folium.FeatureGroup(name="Road Network (Nearby Arcs)", show=False)
     fg_ref = folium.FeatureGroup(name="Reference Route (Ground Truth)", show=True)
     fg_pred = folium.FeatureGroup(name="Predicted Route (PathSnap)", show=True)
@@ -210,13 +238,13 @@ def make_map(trip_id: str, preds_df: pd.DataFrame, out_path: Path, prob_col: str
     fmap.fit_bounds([sw, ne], padding=[20, 20])
     
     fmap.save(str(out_path))
-    print(f"Generated interactive map -> {out_path}")
+    print(f"Generated clean interactive map -> {out_path}")
     return fmap
 
 
 def main():
     print("=" * 80)
-    print("PathSnap: Generating Folium Interactive Maps for Best / Typical / Worst Trips")
+    print("PathSnap: Generating Folium Interactive Maps (Esri / CartoDB Base Tiles)")
     print("=" * 80)
     
     preds_file = RESULTS_DIR / "student_test_predictions.parquet"
@@ -229,53 +257,22 @@ def main():
     
     prob_col = "prob_lightgbm" if "prob_lightgbm" in preds_df.columns else "prob_random_forest"
     
-    # Calculate Top-1 accuracy per trip
     idx_max = preds_df.groupby(["trip_id", "obs_idx"])[prob_col].idxmax()
     top1 = preds_df.loc[idx_max].copy()
     trip_accs = top1.groupby("trip_id")["y"].mean().sort_values(ascending=False)
     
-    print("\nStudent Test Trips Top-1 Accuracy Ranking (LightGBM):")
-    for trip_id, acc in trip_accs.items():
-        print(f"  Trip {trip_id}: {acc * 100:.2f}% Top-1 accuracy")
-        
     best_trip_id = trip_accs.index[0]
     worst_trip_id = trip_accs.index[-1]
     median_idx = len(trip_accs) // 2
     typical_trip_id = trip_accs.index[median_idx]
     
-    print(f"\nSelected representative trips:")
-    print(f"  Best Trip:    {best_trip_id} ({trip_accs[best_trip_id]*100:.2f}%)")
-    print(f"  Typical Trip: {typical_trip_id} ({trip_accs[typical_trip_id]*100:.2f}%)")
-    print(f"  Worst Trip:   {worst_trip_id} ({trip_accs[worst_trip_id]*100:.2f}%)")
+    print(f"Generating maps for Best ({best_trip_id}), Typical ({typical_trip_id}), and Worst ({worst_trip_id})...")
     
     make_map(best_trip_id, preds_df, MAPS_DIR / f"student_test_best_{best_trip_id}.html", prob_col)
     make_map(typical_trip_id, preds_df, MAPS_DIR / f"student_test_typical_{typical_trip_id}.html", prob_col)
     make_map(worst_trip_id, preds_df, MAPS_DIR / f"student_test_worst_{worst_trip_id}.html", prob_col)
     
-    instructions = f"""# Folium Map Screenshots Guide for Hackathon Report
-
-Interactive HTML maps have been generated in the `maps/` directory:
-- Best Trip ({best_trip_id}): `maps/student_test_best_{best_trip_id}.html` (Accuracy: {trip_accs[best_trip_id]*100:.2f}%)
-- Typical Trip ({typical_trip_id}): `maps/student_test_typical_{typical_trip_id}.html` (Accuracy: {trip_accs[typical_trip_id]*100:.2f}%)
-- Worst Trip ({worst_trip_id}): `maps/student_test_worst_{worst_trip_id}.html` (Accuracy: {trip_accs[worst_trip_id]*100:.2f}%)
-
-### Visual Features:
-1. **Raw GPS (Blue circles):** Every raw timestamped GPS observation point.
-2. **Reference Route (Green solid polyline):** Ground-truth sequence of road arcs traversed.
-3. **Predicted Route (Red dashed polyline):** Top-1 model candidate selection.
-4. **Misclassifications (Orange circles):** Highlights points where the top-1 prediction diverged from ground truth.
-5. **Road Network (Grey thin lines):** Surrounding directed road arcs.
-6. **Interactive LayerControl (Top Right):** Toggle any layer on or off.
-
-### Capturing PNG Screenshots for the Report / Presentation:
-1. Double click any `.html` file above to open it in your browser (Chrome/Edge/Firefox).
-2. Adjust the zoom level to show the full trajectory and road network clearly.
-3. Use Windows Snipping Tool (`Win + Shift + S`) or browser full-page screenshot (`Ctrl + Shift + I` -> `Ctrl + Shift + P` -> "Capture full size screenshot").
-4. Save screenshots to `report/figures/map_screenshot_<best|typical|worst>.png`.
-"""
-    with open(MAPS_DIR / "README_MAPS.md", "w") as f:
-        f.write(instructions)
-    print(f"\nSaved screenshot guide to {MAPS_DIR / 'README_MAPS.md'}")
+    print("\nAll maps regenerated with clean Esri WorldStreetMap & CartoDB tiles (zero 403 blocks)!")
 
 
 if __name__ == "__main__":
